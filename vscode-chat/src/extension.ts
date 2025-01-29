@@ -102,7 +102,6 @@ function getWebviewContent(): string {
 
 		<script>
 			const vscode = acquireVsCodeApi();
-			console.log("vscode", vscode);
 
 			document.getElementById('askBtn').addEventListener('click', () => {
 				const text = document.getElementById('prompt').value;
@@ -110,7 +109,7 @@ function getWebviewContent(): string {
 				vscode.postMessage({
 					command: 'chat', text
 				});
-			}
+			});
 
 			window.addEventListener('message', event => {
 				const { command, text } = event.data;
