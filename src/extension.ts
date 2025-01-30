@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import ollama from "ollama";
-import { Remarkable } from "remarkable";
+import markdownit from "markdown-it";
+import hljs from "highlight.js";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("vscode-chat is now alive!");
@@ -19,6 +20,27 @@ export function activate(context: vscode.ExtensionContext) {
 
       panel.webview.html = getWebviewContent();
 
+      const md: markdownit = markdownit({
+        highlight: function (str, lang) {
+          if (lang && hljs.getLanguage(lang)) {
+            try {
+              return (
+                '<pre><code class="hljs">' +
+                hljs.highlight(str, { language: lang, ignoreIllegals: true })
+                  .value +
+                "</code></pre>"
+              );
+            } catch (__) {}
+          }
+
+          return (
+            '<pre><code class="hljs">' +
+            md.utils.escapeHtml(str) +
+            "</code></pre>"
+          );
+        },
+      });
+
       panel.webview.onDidReceiveMessage(
         async (message: any) => {
           switch (message.command) {
@@ -32,8 +54,6 @@ export function activate(context: vscode.ExtensionContext) {
                   messages: [{ role: "user", content: userPrompt }],
                   stream: true,
                 });
-
-                const md = new Remarkable();
 
                 for await (const part of streamResponse) {
                   responseText += part.message.content;
@@ -108,7 +128,7 @@ function getWebviewContent(): string {
 			window.addEventListener('message', event => {
 				const { command, text } = event.data;
 				if (command === 'chatResponse') {
-					document.getElementById('response').innerText = text;
+					document.getElementById('response').innerHTML = text;
 				}
 			});
 

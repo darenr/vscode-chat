@@ -28,9 +28,9 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/highlight.js": "^9.12.4",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "@types/remarkable": "^2.0.8",
     "@types/vscode": "^1.54.0",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
@@ -40,7 +40,10 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "ollama": "^0.5.12",
-    "remarkable": "^2.0.1"
+    "@types/markdown-it": "^14.1.2",
+    "highlight.js": "^11.11.1",
+    "hljs": "^6.2.3",
+    "markdown-it": "^14.1.0",
+    "ollama": "^0.5.12"
   }
 }
