@@ -22,6 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       const md: markdownit = markdownit({
         highlight: function (str, lang) {
+          console.log("highlight, language:", lang);
           if (lang && hljs.getLanguage(lang)) {
             try {
               return (
