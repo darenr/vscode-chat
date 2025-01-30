@@ -1,18 +1,10 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import ollama from "ollama";
+import { Remarkable } from "remarkable";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
   console.log("vscode-chat is now alive!");
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
   const disposable = vscode.commands.registerCommand(
     "vscode-chat.start",
     () => {
@@ -36,16 +28,18 @@ export function activate(context: vscode.ExtensionContext) {
               let responseText = "";
               try {
                 const streamResponse = await ollama.chat({
-                  model: "deepseek-r1:14b",
+                  model: "mistral-small",
                   messages: [{ role: "user", content: userPrompt }],
                   stream: true,
                 });
+
+                const md = new Remarkable();
 
                 for await (const part of streamResponse) {
                   responseText += part.message.content;
                   panel.webview.postMessage({
                     command: "chatResponse",
-                    text: responseText,
+                    text: md.render(responseText),
                   });
                 }
               } catch (error: any) {
@@ -91,6 +85,7 @@ function getWebviewContent(): string {
 				margin-top: 1rem;
 				padding: 1rem;
 				min-height: 200px;
+				border-radius: 6px;
 			}
 		</style>
 		</head>
@@ -105,7 +100,6 @@ function getWebviewContent(): string {
 
 			document.getElementById('askBtn').addEventListener('click', () => {
 				const text = document.getElementById('prompt').value;
-				console.log("askBtn.click", text);
 				vscode.postMessage({
 					command: 'chat', text
 				});
@@ -114,7 +108,6 @@ function getWebviewContent(): string {
 			window.addEventListener('message', event => {
 				const { command, text } = event.data;
 				if (command === 'chatResponse') {
-					console.log("chatResponse", text);
 					document.getElementById('response').innerText = text;
 				}
 			});
