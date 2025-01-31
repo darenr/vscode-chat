@@ -41,9 +41,11 @@
   },
   "dependencies": {
     "@types/markdown-it": "^14.1.2",
+    "duckduckgo-search": "^1.0.7",
     "highlight.js": "^11.11.1",
     "hljs": "^6.2.3",
     "markdown-it": "^14.1.0",
+    "markdown-it-table": "^4.1.1",
     "ollama": "^0.5.12"
   }
 }

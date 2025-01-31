@@ -4,7 +4,7 @@ Chat with a local ollama model within `vscode`
 
 Derived from: [Hello World Extension](https://code.visualstudio.com/api/get-started/your-first-extension)
 
-## Roadmap:
+## Roadmap
 
 - Better markdown support (tables)
 - add code as context
@@ -23,6 +23,3 @@ This extension uses the following `npm` packages:
 - ollama
 - markdown-it (and types)
 - highlight.js (and types)
-
-
-

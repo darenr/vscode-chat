@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
 import ollama from "ollama";
 import markdownit from "markdown-it";
+import { markdownItTable } from "markdown-it-table";
 import hljs from "highlight.js";
+import * as DuckDuckGo from "duckduckgo-search"; // Import the regular web search library
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("vscode-chat is now alive!");
@@ -20,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       panel.webview.html = getWebviewContent();
 
-      const md: markdownit = markdownit({
+      let md: markdownit = markdownit({
         highlight: function (str, lang) {
           if (lang && hljs.getLanguage(lang)) {
             try {
@@ -41,27 +43,52 @@ export function activate(context: vscode.ExtensionContext) {
         },
       });
 
+      md.use(markdownItTable);
+
       panel.webview.onDidReceiveMessage(
         async (message: any) => {
           switch (message.command) {
             case "chat":
+              const model = "mistral-small";
               console.log("onDidReceiveMessage", message.text);
               let responseText = "";
               try {
                 const prompt = `/set parameters num_ctx 16384\n${message.text}`;
 
                 const streamResponse = await ollama.chat({
-                  model: "mistral-small",
+                  model: model,
                   messages: [{ role: "user", content: prompt }],
                   stream: true,
+                  tools: tools,
                 });
 
                 for await (const part of streamResponse) {
                   responseText += part.message.content;
-                  panel.webview.postMessage({
-                    command: "chatResponse",
-                    text: md.render(responseText),
-                  });
+
+                  if (part.message.tool_calls) {
+                    for (const toolCall of part.message.tool_calls) {
+                      if (toolCall.function.name === "search_web") {
+                        const searchResults = await searchWeb(
+                          toolCall.function.arguments.query
+                        );
+
+                        console.log("Search results:", searchResults);
+
+                        // Send search results back to the model (potentially in a new stream)
+                        const newStreamResponse = await ollama.chat({
+                          model: model,
+                          messages: [{ role: "user", content: prompt }],
+                          tools: tools,
+                          stream: true,
+                        });
+
+                        panel.webview.postMessage({
+                          command: "chatResponse",
+                          text: md.render(responseText),
+                        });
+                      }
+                    }
+                  }
                 }
                 panel.webview.postMessage({
                   command: "chatFinished",
@@ -85,6 +112,43 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disposable);
 }
+
+// Tool for performing a web search using DuckDuckGo
+async function searchWeb(query: string) {
+  try {
+    const results = await DuckDuckGo.search(query);
+    // Extract and return relevant information from the results
+    // (e.g., titles, snippets, URLs)
+    return results.results.map((result) => ({
+      title: result.title,
+      snippet: result.snippet,
+      url: result.url,
+    }));
+  } catch (error) {
+    console.error("Error searching the web:", error);
+    return "Error searching the web.";
+  }
+}
+
+const tools = [
+  {
+    type: "function",
+    function: {
+      name: "search_web",
+      description: "Search the web using DuckDuckGo.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "The web search query.",
+          },
+        },
+        required: ["query"],
+      },
+    },
+  },
+];
 
 function getWebviewContent(): string {
   return /*html*/ `<!DOCTYPE html>
