@@ -46,12 +46,13 @@ export function activate(context: vscode.ExtensionContext) {
           switch (message.command) {
             case "chat":
               console.log("onDidReceiveMessage", message.text);
-              const userPrompt = message.text;
               let responseText = "";
               try {
+                const prompt = `/set parameters num_ctx 16384\n${message.text}`;
+
                 const streamResponse = await ollama.chat({
                   model: "mistral-small",
-                  messages: [{ role: "user", content: userPrompt }],
+                  messages: [{ role: "user", content: prompt }],
                   stream: true,
                 });
 
@@ -139,6 +140,13 @@ function getWebviewContent(): string {
 
 		<script>
 			const vscode = acquireVsCodeApi();
+
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault(); 
+          document.getElementById('askBtn').click(); // Trigger button click
+        }
+      });      
 
 			document.getElementById('askBtn').addEventListener('click', () => {
 				const text = document.getElementById('prompt').value;
