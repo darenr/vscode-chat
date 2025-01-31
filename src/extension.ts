@@ -22,7 +22,6 @@ export function activate(context: vscode.ExtensionContext) {
 
       const md: markdownit = markdownit({
         highlight: function (str, lang) {
-          console.log("highlight, language:", lang);
           if (lang && hljs.getLanguage(lang)) {
             try {
               return (
@@ -63,6 +62,9 @@ export function activate(context: vscode.ExtensionContext) {
                     text: md.render(responseText),
                   });
                 }
+                panel.webview.postMessage({
+                  command: "chatFinished",
+                });
               } catch (error: any) {
                 panel.webview.postMessage({
                   command: "chatResponse",
@@ -90,6 +92,8 @@ function getWebviewContent(): string {
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Deep Seek Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
+
 		<style>
 			body {
 				font-family: Arial, sans-serif;	
@@ -98,6 +102,8 @@ function getWebviewContent(): string {
 
 			#prompt {
 				width: 100%;
+ 				border-radius: 6px;
+        padding: 0.5rem;
 				box-sizing: border-box;
 			}
 			
@@ -108,12 +114,27 @@ function getWebviewContent(): string {
 				min-height: 200px;
 				border-radius: 6px;
 			}
+
+      #askBtn, #clearBtn {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        border: none;
+        background-color: #007acc;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      div.code {
+        white-space: pre;
+      }
 		</style>
 		</head>
 		<body>
 		<h2>Deep Seek Chat</h2>
 		<textarea id="prompt" rows="3" placeholder="Type your prompt here"></textarea><br />
-		<button id="askBtn">Ask</button>
+		<button id="askBtn" class="vscode-chat-extn">Ask</button>
+		<button id="clearBtn" class="vscode-chat-extn">Clear</button>
 		<div id="response"></div>
 
 		<script>
@@ -121,9 +142,14 @@ function getWebviewContent(): string {
 
 			document.getElementById('askBtn').addEventListener('click', () => {
 				const text = document.getElementById('prompt').value;
+        document.body.style.cursor = 'wait';
 				vscode.postMessage({
 					command: 'chat', text
 				});
+			});
+
+      document.getElementById('clearBtn').addEventListener('click', () => {
+				document.getElementById('response').innerHTML = "";
 			});
 
 			window.addEventListener('message', event => {
@@ -131,6 +157,9 @@ function getWebviewContent(): string {
 				if (command === 'chatResponse') {
 					document.getElementById('response').innerHTML = text;
 				}
+        else if (command === 'chatFinished') {
+          document.body.style.cursor = 'default';
+        }
 			});
 
 		</script>
