@@ -53,6 +53,8 @@ export function activate(context: vscode.ExtensionContext) {
               console.log("onDidReceiveMessage", message.text);
               let responseText = "";
               try {
+                // get any selected text in the editor
+                //
                 // const editor = vscode.window.activeTextEditor;
                 // if (!editor) {
                 //   vscode.window.showInformationMessage(
@@ -67,6 +69,17 @@ export function activate(context: vscode.ExtensionContext) {
                 //   );
                 //   return;
                 // }
+
+                // update selection:
+
+                // editor
+                //   .edit((builder) => {
+                //     builder.replace(editor.selection, text);
+                //   })
+                //   .then((success) => {
+                //     var postion = editor.selection.end;
+                //     editor.selection = new vscode.Selection(postion, postion);
+                //   });
 
                 const prompt = `/set parameters num_ctx 16384\n${message.text}`;
 
