@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       const panel = vscode.window.createWebviewPanel(
         "deepChat",
-        "Deep Seek Chat",
+        "Chat",
         vscode.ViewColumn.One,
         {
           enableScripts: true,
@@ -53,6 +53,21 @@ export function activate(context: vscode.ExtensionContext) {
               console.log("onDidReceiveMessage", message.text);
               let responseText = "";
               try {
+                // const editor = vscode.window.activeTextEditor;
+                // if (!editor) {
+                //   vscode.window.showInformationMessage(
+                //     "No selection detected."
+                //   );
+                //   return;
+                // }
+                // var text = editor.document.getText(editor.selection);
+                // if (text === "") {
+                //   vscode.window.showInformationMessage(
+                //     "No selection detected."
+                //   );
+                //   return;
+                // }
+
                 const prompt = `/set parameters num_ctx 16384\n${message.text}`;
 
                 const streamResponse = await ollama.chat({
