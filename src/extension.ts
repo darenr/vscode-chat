@@ -43,21 +43,9 @@ export function activate(context: vscode.ExtensionContext) {
               let responseText = "";
               try {
                 // get any selected text in the editor
-                //
-                // const editor = vscode.window.activeTextEditor;
-                // if (!editor) {
-                //   vscode.window.showInformationMessage(
-                //     "No selection detected."
-                //   );
-                //   return;
-                // }
-                // var text = editor.document.getText(editor.selection);
-                // if (text === "") {
-                //   vscode.window.showInformationMessage(
-                //     "No selection detected."
-                //   );
-                //   return;
-                // }
+
+                const selectedText = getSelectedTextInOtherWindow();
+                console.log("selectedText", selectedText);
 
                 // update selection:
 
@@ -69,12 +57,30 @@ export function activate(context: vscode.ExtensionContext) {
                 //     var postion = editor.selection.end;
                 //     editor.selection = new vscode.Selection(postion, postion);
                 //   });
-                const prompt = `/set parameters num_ctx 16384\n${message.text}`;
+
+                const context_size =
+                  message.text.length + selectedText.length + 256;
+                let prompt = message.text;
+                if (selectedText) {
+                  prompt = `
+                    You are an expert in all things. 
+                    Answer the question: 
+                    
+                    "${message.text}" 
+                    
+                    in the context of the following:
+                    
+                    "${selectedText}"
+                  `;
+                }
 
                 const streamResponse = await ollama.chat({
                   model: model,
                   messages: [{ role: "user", content: prompt }],
                   stream: true,
+                  options: {
+                    num_ctx: context_size,
+                  },
                 });
 
                 for await (const part of streamResponse) {
@@ -105,6 +111,22 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(disposable);
+}
+
+function getSelectedTextInOtherWindow() {
+  for (const otherWindowEditor of vscode.window.visibleTextEditors) {
+    const selection = otherWindowEditor.selection;
+    if (selection && !selection.isEmpty) {
+      const selectionRange = new vscode.Range(
+        selection.start.line,
+        selection.start.character,
+        selection.end.line,
+        selection.end.character
+      );
+      return otherWindowEditor.document.getText(selectionRange);
+    }
+  }
+  return "";
 }
 
 function getWebviewContent(): string {
