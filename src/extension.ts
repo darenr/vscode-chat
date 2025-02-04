@@ -93,6 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
                 panel.webview.postMessage({
                   command: "chatFinished",
                 });
+                console.log(responseText);
               } catch (error: any) {
                 panel.webview.postMessage({
                   command: "chatResponse",
