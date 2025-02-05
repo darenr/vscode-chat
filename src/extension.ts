@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
     "vscode-chat.start",
     () => {
       const panel = vscode.window.createWebviewPanel(
-        "deepChat",
+        "codeChat",
         "Code Chat",
         vscode.ViewColumn.One,
         {
@@ -21,7 +21,15 @@ export function activate(context: vscode.ExtensionContext) {
         }
       );
 
-      panel.webview.html = getWebviewContent();
+      const styleGithubThemeUri = panel.webview.asWebviewUri(
+        panel.webview.asWebviewUri(
+          vscode.Uri.file(
+            context.asAbsolutePath("node_modules/highlight.js/styles/xt256.css")
+          )
+        )
+      );
+
+      panel.webview.html = getWebviewContent(styleGithubThemeUri);
 
       const md: markdownit = markdownit({
         breaks: true,
@@ -127,14 +135,15 @@ function getSelectedTextInOtherWindow() {
   return "";
 }
 
-function getWebviewContent(): string {
+function getWebviewContent(styleGithubThemeUri: vscode.Uri): string {
   return /*html*/ `<!DOCTYPE html>
 		<html lang="en">
 		<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Deep Seek Chat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
+  
+    <link rel="stylesheet" href="${styleGithubThemeUri}">
 
 		<style>
 			body {

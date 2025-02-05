@@ -1,7 +1,7 @@
 {
   "name": "vscode-chat",
   "displayName": "vscode-chat",
-  "description": "Chat with Ollama models",
+  "description": "Chat with AI models",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.54.0"
@@ -48,6 +48,7 @@
     "markdown-it": "^14.1.0",
     "markdown-it-emoji": "^3.0.0",
     "markdown-it-table": "^4.1.1",
+    "material-icons": "^1.13.13",
     "ollama": "^0.5.12"
   }
 }
