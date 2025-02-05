@@ -2,6 +2,9 @@
 
 `vscode-chat-ext` is an extension for Visual Studio Code that allows users to interact with an AI model (currently using Ollama's `qwen2.5-coder:7b`) to answer questions based on the context of selected text within the editor.
 
+![Screenshot](screenshot.png)
+
+
 ## Features
 
 - **Interactive Chat**: Type a question or prompt and receive an AI-generated response.
