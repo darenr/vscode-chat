@@ -8,15 +8,9 @@
 - **Context-Based Answers**: The AI model takes into account the currently selected text in the editor when generating its response, ensuring more relevant answers.
 - **Highlight.js Syntax Highlighting**: Supports syntax highlighting for code snippets in the chat response.
 
-## Installation
-
-1. Open Visual Studio Code.
-2. Go to the Extensions view by clicking on the square icon on the sidebar or pressing `Ctrl+Shift+X`.
-3. Search for "vscode-chat-ext" and click "Install".
-
 ## Usage
 
-- **Start Chat**: Press `F1` or access through the Command Palette, type `Chat with AI`, and select `vscode-chat: Start`.
+- **Start Chat**: Access through the Command Palette, type `Chat with AI`.
 - **Type Your Prompt**: In the webview panel that opens, type your question or prompt.
 - **Ask**: Click the "Ask" button or press Enter to send your query to the AI model.
 - **Clear Response**: Use the "Clear" button to clear the response area if needed.
@@ -30,8 +24,7 @@ When you click the "Ask" button, `vscode-chat-ext` sends the text in the prompt 
 The extension is built with TypeScript and uses Webpack for bundling. To contribute to or modify the extension:
 
 1. Clone the repository.
-2. Install dependencies by running `npm install`.
-3. Run the development server with `npm start`.
+2. Install dependencies by running `npm install`
 
 ### Contribution Guidelines
 
@@ -45,6 +38,3 @@ The extension is built with TypeScript and uses Webpack for bundling. To contrib
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
-## Acknowledgements
-
-Thanks to Ollama and markdown-it for their contributions to this project.
