@@ -48,5 +48,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Acknowledgements
 
 Thanks to Ollama and markdown-it for their contributions to this project.
-
----

@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       const panel = vscode.window.createWebviewPanel(
         "deepChat",
-        "Deep Seek Chat",
+        "Deep Chat",
         vscode.ViewColumn.One,
         {
           enableScripts: true,
@@ -45,7 +45,6 @@ export function activate(context: vscode.ExtensionContext) {
                 // get any selected text in the editor
 
                 const selectedText = getSelectedTextInOtherWindow();
-                console.log("selectedText", selectedText);
 
                 // update selection:
 
@@ -60,19 +59,15 @@ export function activate(context: vscode.ExtensionContext) {
 
                 const context_size =
                   message.text.length + selectedText.length + 256;
-                let prompt = message.text;
-                if (selectedText) {
-                  prompt = `
-                    You are an expert in all things. 
-                    Answer the question: 
-                    
-                    "${message.text}" 
-                    
-                    in the context of the following:
-                    
-                    "${selectedText}"
-                  `;
-                }
+
+                const prompt_prefix = `You are an expert, but if you don't know, just say so. 
+                Be concise and minimal in your answers.  Answer the question:`;
+
+                const prompt = `${prompt_prefix} ${message.text}${
+                  selectedText
+                    ? `\nin the context of the following: ${selectedText}`
+                    : ""
+                }`;
 
                 const streamResponse = await ollama.chat({
                   model: model,
@@ -87,13 +82,13 @@ export function activate(context: vscode.ExtensionContext) {
                   responseText += part.message.content;
                   panel.webview.postMessage({
                     command: "chatResponse",
-                    text: md.render(responseText),
+                    html: md.render(responseText),
+                    md: responseText,
                   });
                 }
                 panel.webview.postMessage({
                   command: "chatFinished",
                 });
-                console.log(responseText);
               } catch (error: any) {
                 panel.webview.postMessage({
                   command: "chatResponse",
@@ -151,17 +146,10 @@ function getWebviewContent(): string {
         padding: 0.5rem;
 				box-sizing: border-box;
 			}
-			
-			#response {
-				border: 1px solid #ccc;
-				margin-top: 1rem;
-				padding: 1rem;
-				min-height: 200px;
-				border-radius: 6px;
-			}
 
       #askBtn, #clearBtn {
-        margin-top: 1rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
         padding: 0.5rem 1rem;
         border: none;
         background-color: #007acc;
@@ -173,14 +161,78 @@ function getWebviewContent(): string {
       div.code {
         white-space: pre;
       }
+
+      /* Tab Container */
+      .tabs {
+          display: flex;
+          margin-top: 20px;
+          xmargin-bottom: 10px;
+      }
+
+      /* Tab Buttons */
+      .tab-button {
+          cursor: pointer;
+          border: none;
+          background-color:rgb(87, 87, 87);
+          outline: none;
+          padding: 0.5rem 1rem;
+          border-top-right-radius: 6px;
+          border-top-left-radius: 6px;
+      }
+
+      .tab-button.active {
+          background: #ddd;
+          font-weight: bold;
+      }
+
+      /* Tab Content */
+      .tab-content {
+          display: none;
+          margin-top: 0;
+          padding: 1rem;
+				  min-height: 200px;
+          border: 1px solid #ccc;
+          border-top-right-radius: 6px;
+          border-bottom-left-radius: 6px;
+          border-bottom-right-radius: 6px;
+      }
+
+      #response_html, #response_md {
+        margin: 0;
+      }
+
+      .tab-content.active {
+          display: block;
+      }
+
 		</style>
 		</head>
 		<body>
 		<h2>Chat with AI</h2>
 		<textarea id="prompt" rows="3" placeholder="Type your prompt here"></textarea><br />
-		<button id="askBtn" class="vscode-chat-extn">Ask</button>
+
+    <button id="askBtn" class="vscode-chat-extn">Ask</button>
 		<button id="clearBtn" class="vscode-chat-extn">Clear</button>
-		<div id="response"></div>
+    <br/>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'tab1')">Formatted</button>
+        <button class="tab-button" onclick="openTab(event, 'tab2')">Raw</button>
+    </div>
+
+    <!-- Tab Content -->
+    <div id="tab1" class="tab-content active">
+      <div id="response_html"></div>
+    </div>
+    <div id="tab2" class="tab-content">
+      <pre>
+        <code>
+          <div id="response_md"></div>
+        </code>
+      </pre>
+    </div>
+
 
 		<script>
 			const vscode = acquireVsCodeApi();
@@ -203,18 +255,36 @@ function getWebviewContent(): string {
 			});
 
       document.getElementById('clearBtn').addEventListener('click', () => {
-				document.getElementById('response').innerHTML = "";
+				document.getElementById('response_html').innerHTML = "";
+				document.getElementById('response_md').innerHTML = "";
+				document.getElementById('prompt').value = "";
+        document.getElementById('prompt').focus();
 			});
 
 			window.addEventListener('message', event => {
-				const { command, text } = event.data;
+				const { command, html, md } = event.data;
 				if (command === 'chatResponse') {
-					document.getElementById('response').innerHTML = text;
+					document.getElementById('response_html').innerHTML = html;
+					document.getElementById('response_md').innerHTML = md;
 				}
         else if (command === 'chatFinished') {
           document.body.style.cursor = 'default';
         }
 			});
+
+      function openTab(event, tabId) {
+            // Hide all tab contents
+            document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+
+            // Deactivate all buttons
+            document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+
+            // Show the selected tab
+            document.getElementById(tabId).classList.add("active");
+
+            // Activate the clicked button
+            event.currentTarget.classList.add("active");
+        }
 
 		</script>
 
