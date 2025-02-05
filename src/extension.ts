@@ -4,6 +4,8 @@ import markdownit from "markdown-it";
 import { full as emoji } from "markdown-it-emoji";
 import hljs from "highlight.js";
 
+const model = "qwen2.5-coder:7b";
+
 export function activate(context: vscode.ExtensionContext) {
   console.log("vscode-chat is now alive!");
 
@@ -12,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       const panel = vscode.window.createWebviewPanel(
         "deepChat",
-        "Deep Chat",
+        "Code Chat",
         vscode.ViewColumn.One,
         {
           enableScripts: true,
@@ -39,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
           switch (message.command) {
             case "chat":
               console.log("onDidReceiveMessage", message.text);
-              const model = "qwen2.5-coder:7b";
+
               let responseText = "";
               try {
                 // get any selected text in the editor
@@ -158,8 +160,8 @@ function getWebviewContent(): string {
         cursor: pointer;
       }
 
-      div.code {
-        white-space: pre;
+      pre {
+        white-space: pre-wrap;
       }
 
       /* Tab Container */
@@ -178,11 +180,11 @@ function getWebviewContent(): string {
           padding: 0.5rem 1rem;
           border-top-right-radius: 6px;
           border-top-left-radius: 6px;
+          transition: 0.3s;
       }
 
       .tab-button.active {
           background: #ddd;
-          font-weight: bold;
       }
 
       /* Tab Content */
@@ -226,11 +228,7 @@ function getWebviewContent(): string {
       <div id="response_html"></div>
     </div>
     <div id="tab2" class="tab-content">
-      <pre>
-        <code>
-          <div id="response_md"></div>
-        </code>
-      </pre>
+      <pre id="response_md"></pre>
     </div>
 
 
@@ -273,16 +271,9 @@ function getWebviewContent(): string {
 			});
 
       function openTab(event, tabId) {
-            // Hide all tab contents
             document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-
-            // Deactivate all buttons
             document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-
-            // Show the selected tab
             document.getElementById(tabId).classList.add("active");
-
-            // Activate the clicked button
             event.currentTarget.classList.add("active");
         }
 
